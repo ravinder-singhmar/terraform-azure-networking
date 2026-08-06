@@ -7,6 +7,6 @@ module "vnet" {
     vnetdetails = var.vnetdetails
 }
 module "subnet" {
-    source = "../../modules/azurerm_subnetwork"
+    source = "../../modules/azurerm_subnet"
     subnetdetails = var.subnetdetails
 }
