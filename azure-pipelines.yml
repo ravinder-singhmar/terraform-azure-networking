@@ -18,7 +18,3 @@ steps:
   - script: terraform validate
     workingDirectory: environment/dev
     displayName: "Terraform Validate"
-
-  - script: terraform plan
-    workingDirectory: environment/dev
-    displayName: "Terraform Plan"
