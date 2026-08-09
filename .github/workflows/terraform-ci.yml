@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   security-scans:
     name: 'Security Scans (Gitleaks & Checkov)'
@@ -28,7 +32,7 @@ jobs:
           soft_fail: false
 
   terraform-validate:
-    name: 'Terraform Validate [${{ matrix.environment }}]'
+    name: 'Terraform Validate & Deploy [${{ matrix.environment }}]'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -47,7 +51,12 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
-        run: terraform init -backend=false
+        run: terraform init
+        env:
+          ARM_USE_OIDC: true
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
       - name: Terraform Format Check
         run: terraform fmt -check
@@ -61,3 +70,19 @@ jobs:
         
       - name: Run TFLint
         run: tflint -f compact
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+        env:
+          ARM_USE_OIDC: true
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+        env:
+          ARM_USE_OIDC: true
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
