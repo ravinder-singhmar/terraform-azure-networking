@@ -18,6 +18,20 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # 1. Secret Scanning (Gitleaks)
+      - name: Secret Scanning with Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 2. IaC Security Scanning (Checkov)
+      - name: Infrastructure Security Scanning (Checkov)
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: environment/dev
+          framework: terraform
+          soft_fail: true
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
