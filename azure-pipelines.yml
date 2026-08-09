@@ -1,0 +1,24 @@
+trigger:
+  branches:
+    include:
+      - feature/cicd
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - script: terraform init
+    workingDirectory: environment/dev
+    displayName: "Terraform Init"
+
+  - script: terraform fmt -check
+    workingDirectory: environment/dev
+    displayName: "Terraform Format Check"
+
+  - script: terraform validate
+    workingDirectory: environment/dev
+    displayName: "Terraform Validate"
+
+  - script: terraform plan
+    workingDirectory: environment/dev
+    displayName: "Terraform Plan"
