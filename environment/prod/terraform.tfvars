@@ -1,25 +1,31 @@
 rgdetails = {
   rg1 = {
-    name     = "dev-rg1"
-    location = "East US"
-  }
-  rg2 = {
-    name     = "dev-rg2"
+    name     = "prod-rg-network"
     location = "East US"
   }
 }
 
 vnetdetails = {
   vnet1 = {
-    name                = "dev-vnet1"
+    name                = "prod-vnet-network"
+    address_space       = ["10.30.0.0/16"]
     location            = "East US"
-    resource_group_name = "dev-rg1"
-    address_space       = ["10.0.0.0/16"]
+    resource_group_name = "rg1"
   }
-  vnet2 = {
-    name                = "dev-vnet2"
-    location            = "west US"
-    resource_group_name = "dev-rg2"
-    address_space       = ["10.0.0.0/16"]
+}
+
+subnetdetails = {
+  subnet1 = {
+    name                 = "prod-snet-app"
+    resource_group_name  = "prod-rg-network"
+    virtual_network_name = "vnet1"
+    address_prefixes     = ["10.30.0.0/24"]
+  }
+
+  subnet2 = {
+    name                 = "prod-snet-db"
+    resource_group_name  = "prod-rg-network"
+    virtual_network_name = "vnet1"
+    address_prefixes     = ["10.30.1.0/24"]
   }
 }
