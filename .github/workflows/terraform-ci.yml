@@ -30,7 +30,7 @@ jobs:
         with:
           directory: environment/dev
           framework: terraform
-          soft_fail: true
+          soft_fail: false
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
