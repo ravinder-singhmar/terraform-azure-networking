@@ -6,14 +6,9 @@ on:
       - main
 
 jobs:
-  terraform:
-    name: 'Terraform Validate'
+  security-scans:
+    name: 'Security Scans (Gitleaks & Checkov)'
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: environment/dev
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -28,15 +23,36 @@ jobs:
       - name: Infrastructure Security Scanning (Checkov)
         uses: bridgecrewio/checkov-action@master
         with:
-          directory: environment/dev
+          directory: .
           framework: terraform
           soft_fail: false
+
+  terraform-validate:
+    name: 'Terraform Validate [${{ matrix.environment }}]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [dev, preprod, prod, test]
+
+    defaults:
+      run:
+        working-directory: environment/${{ matrix.environment }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
         run: terraform init
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
       - name: Terraform Format Check
         run: terraform fmt -check
@@ -50,4 +66,19 @@ jobs:
         
       - name: Run TFLint
         run: tflint -f compact
-        working-directory: environment/dev
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+        env:
+          ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
